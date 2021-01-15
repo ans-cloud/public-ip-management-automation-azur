@@ -23,7 +23,7 @@
     "outputs": {
         "managed_service_identity_id": {
             "type": "string",
-            "value": "[reference(parameters('workflow_name'))"
+            "value": "[reference(parameters('workflow_name'))]"
         }
     },
     "variables": {},
@@ -47,88 +47,61 @@
                             "recurrence": {
                                 "frequency": "Month",
                                 "interval": 1,
-                                "startTime": "2020-12-01T09:00:00Z",
+                                "startTime": "2020-12-01T00:00:00Z",
                                 "timeZone": "UTC"
                             },
                             "type": "Recurrence"
                         }
                     },
                     "actions": {
-                        "definition": {
-                            "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                        "For_each_subscription": {
                             "actions": {
-                                "For_each_subscription": {
+                                "For_each_public_ip": {
                                     "actions": {
-                                        "For_each_public_ip": {
-                                            "actions": {
-                                                "Condition": {
-                                                    "actions": {},
-                                                    "else": {
-                                                        "actions": {
-                                                            "Delete_public_IP": {
-                                                                "inputs": {
-                                                                    "authentication": {
-                                                                        "audience": "https://management.azure.com",
-                                                                        "type": "ManagedServiceIdentity"
-                                                                    },
-                                                                    "method": "DELETE",
-                                                                    "queries": {
-                                                                        "api-version": "2020-07-01"
-                                                                    },
-                                                                    "uri": "https://management.azure.com@{items('For_each_public_ip')?['id']}"
-                                                                },
-                                                                "runAfter": {},
-                                                                "type": "Http"
-                                                            }
-                                                        }
-                                                    },
-                                                    "expression": {
-                                                        "and": [
-                                                            {
-                                                                "contains": [
-                                                                    "@items('For_each_public_ip')?['properties']",
-                                                                    "ipConfiguration"
-                                                                ]
-                                                            }
-                                                        ]
-                                                    },
-                                                    "runAfter": {},
-                                                    "type": "If"
+                                        "Condition": {
+                                            "actions": {},
+                                            "else": {
+                                                "actions": {
+                                                    "Delete_public_IP": {
+                                                        "inputs": {
+                                                            "authentication": {
+                                                                "audience": "https://management.azure.com",
+                                                                "type": "ManagedServiceIdentity"
+                                                            },
+                                                            "method": "DELETE",
+                                                            "queries": {
+                                                                "api-version": "2020-07-01"
+                                                            },
+                                                            "uri": "https://management.azure.com@{items('For_each_public_ip')?['id']}"
+                                                        },
+                                                        "runAfter": {},
+                                                        "type": "Http"
+                                                    }
                                                 }
                                             },
-                                            "foreach": "@body('Get_Public_IPs')?['value']",
-                                            "runAfter": {
-                                                "Get_Public_IPs": [
-                                                    "Succeeded"
+                                            "expression": {
+                                                "and": [
+                                                    {
+                                                        "contains": [
+                                                            "@items('For_each_public_ip')?['properties']",
+                                                            "ipConfiguration"
+                                                        ]
+                                                    }
                                                 ]
                                             },
-                                            "type": "Foreach"
-                                        },
-                                        "Get_Public_IPs": {
-                                            "inputs": {
-                                                "authentication": {
-                                                    "audience": "https://management.azure.com",
-                                                    "type": "ManagedServiceIdentity"
-                                                },
-                                                "method": "GET",
-                                                "queries": {
-                                                    "api-version": "2020-07-01"
-                                                },
-                                                "uri": "https://management.azure.com/subscriptions/@{items('For_each_subscription')['subscriptionId']}/providers/Microsoft.Network/publicIPAddresses"
-                                            },
                                             "runAfter": {},
-                                            "type": "Http"
+                                            "type": "If"
                                         }
                                     },
-                                    "foreach": "@body('Get_Subscriptions')?['value']",
+                                    "foreach": "@body('Get_Public_IPs')?['value']",
                                     "runAfter": {
-                                        "Get_Subscriptions": [
+                                        "Get_Public_IPs": [
                                             "Succeeded"
                                         ]
                                     },
                                     "type": "Foreach"
                                 },
-                                "Get_Subscriptions": {
+                                "Get_Public_IPs": {
                                     "inputs": {
                                         "authentication": {
                                             "audience": "https://management.azure.com",
@@ -136,28 +109,37 @@
                                         },
                                         "method": "GET",
                                         "queries": {
-                                            "api-version": "2020-01-01"
+                                            "api-version": "2020-07-01"
                                         },
-                                        "uri": "https://management.azure.com/subscriptions"
+                                        "uri": "https://management.azure.com/subscriptions/@{items('For_each_subscription')['subscriptionId']}/providers/Microsoft.Network/publicIPAddresses"
                                     },
                                     "runAfter": {},
                                     "type": "Http"
                                 }
                             },
-                            "contentVersion": "1.0.0.0",
-                            "outputs": {},
-                            "parameters": {},
-                            "triggers": {
-                                "Recurrence": {
-                                    "recurrence": {
-                                        "frequency": "Day",
-                                        "interval": 7
-                                    },
-                                    "type": "Recurrence"
-                                }
-                            }
+                            "foreach": "@body('Get_Subscriptions')?['value']",
+                            "runAfter": {
+                                "Get_Subscriptions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Foreach"
                         },
-                        "parameters": {}
+                        "Get_Subscriptions": {
+                            "inputs": {
+                                "authentication": {
+                                    "audience": "https://management.azure.com",
+                                    "type": "ManagedServiceIdentity"
+                                },
+                                "method": "GET",
+                                "queries": {
+                                    "api-version": "2020-01-01"
+                                },
+                                "uri": "https://management.azure.com/subscriptions"
+                            },
+                            "runAfter": {},
+                            "type": "Http"
+                        }
                     },
                     "outputs": {}
                 },

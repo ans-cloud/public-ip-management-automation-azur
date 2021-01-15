@@ -8,7 +8,7 @@
         "workflow_location": {
             "value": "uksouth"
         },
-        workflow_tags: {
+        "workflow_tags": {
             "value": {
                 "Application": "Public IP Management Automation",
                 "Criticality": "Tier 1",
