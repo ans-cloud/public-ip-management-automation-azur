@@ -1,4 +1,4 @@
-# ANS Power Management Automation for Azure
+# ANS Public IP Management Automation for Azure
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fans-cloud%2Fpublic-ip-management-automation-azure%2Fmain%2Fazure-deploy.json)
 
