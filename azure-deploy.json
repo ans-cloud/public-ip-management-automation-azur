@@ -20,12 +20,7 @@
             "type": "Object"
         }
     },
-    "outputs": {
-        "managed_service_identity_id": {
-            "type": "string",
-            "value": "[reference(parameters('workflow_name'))]"
-        }
-    },
+    "outputs": {},
     "variables": {},
     "resources": [
         {
